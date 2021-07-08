@@ -1,0 +1,16 @@
+New-VHD -Path C:\VM\WSAA-M1-VM-S2-D1.vhdx -SizeBytes 20gb -Dynamic
+New-VHD -Path C:\VM\WSAA-M1-VM-S2-D2.vhdx -SizeBytes 20gb -Dynamic
+
+Add-VMHardDiskDrive -VMName WSAA-M1-VM-S2 -Path C:\VM\WSAA-M1-VM-S2-D1.vhdx
+Add-VMHardDiskDrive -VMName WSAA-M1-VM-S2 -Path C:\VM\WSAA-M1-VM-S2-D2.vhdx
+
+Invoke-Command -VMName WSAA-M1-VM-S2 -ScriptBlock { Get-Disk | Select DiskNumber, PartitionStyle, IsOffline }
+
+Invoke-Command -VMName WSAA-M1-VM-S2 -ScriptBlock { Initialize-Disk -Number 1 -PartitionStyle MBR }
+Invoke-Command -VMName WSAA-M1-VM-S2 -ScriptBlock { Initialize-Disk -Number 2 -PartitionStyle GPT }
+
+Invoke-Command -VMName WSAA-M1-VM-S2 -ScriptBlock { New-Partition -DiskNumber 1 -AssignDriveLetter -UseMaximumSize } -Credential $c
+Invoke-Command -VMName WSAA-M1-VM-S2 -ScriptBlock { New-Partition -DiskNumber 2 -AssignDriveLetter -UseMaximumSize } -Credential $c
+
+Invoke-Command -VMName WSAA-M1-VM-S2 -ScriptBlock { Format-Volume -DriveLetter D -FileSystem NTFS -NewFileSystemLabel DISK1 } -Credential $c
+Invoke-Command -VMName WSAA-M1-VM-S2 -ScriptBlock { Format-Volume -DriveLetter E -FileSystem NTFS -NewFileSystemLabel DISK2 } -Credential $c
